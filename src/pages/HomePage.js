@@ -75,7 +75,7 @@ const HomePage = () => {
       ),
     },
   ];
-  const rows = cars.map((car) => ({
+  const rows = cars?.map((car) => ({
     id: car._id,
     name: car.make + " " + car.model,
     size: car.size,
@@ -85,14 +85,11 @@ const HomePage = () => {
     release_date: car.release_date,
   }));
 
-  const getData =
-    useCallback(
-      async () => {
+  const getData = useCallback(async () => {
     const res = await apiService.get(`/cars?page=${page}`);
-    setCars(res.data.cars);
-    setTotalPages(res.data.total);
-      }
-      , [page]);
+    setCars(res.data.data.cars);
+    setTotalPages(res.data.data.total);
+  }, [page]);
 
   useEffect(() => {
     getData();
@@ -110,10 +107,14 @@ const HomePage = () => {
       />
       <FormModal
         open={openForm}
-        refreshData={() => {
+        refreshData={(car) => {
           setOpenForm(false);
           setSelectedCar(null);
-          getData();
+          if (car) {
+            setPage(totalPages);
+          } else {
+            getData();
+          }
         }}
         selectedCar={selectedCar}
         handleClose={() => {
